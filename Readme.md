@@ -10,7 +10,7 @@
     -[ ] It will automatically send"\n" to the server every 5 seconds.S
   
   - The **server** program performs following operations:
-    -[ ] Whenever a message that is not "\n"is received from a client, the server sends the same message back to all known active clients(i.e. the clients that the server has received messages fromwithin the past 15 seconds), including the one the message is received from.
+    -[X] Whenever a message that is not "\n"is received from a client, the server sends the same message back to all known active clients(i.e. the clients that the server has received messages fromwithin the past 15 seconds), including the one the message is received from.
 
   # To Build client and server program:
   ``` sh

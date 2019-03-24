@@ -84,40 +84,44 @@ int main(int 	argc, char** argv){
 			}
 		}
 
-
+		already_added = 0;
 		// //check if already in the list
 		for (int i = 0; i < MAX_CLIENTS; i++){
-			
+			if(ACTIVE_CLIENTS[i].active==1){	
+				struct in_addr rec =  ((struct sockaddr_in*) ACTIVE_CLIENTS[i].client) -> sin_addr;
+				if(bcmp(&rec, &(activeCl.sin_addr),4 )==0){
+					already_added =1;
+					break;
+				}
+
+			}
 		}
 
 		//add the new client
 		int j = 0;
-		while(!allocated && j< MAX_CLIENTS){
+		while(!allocated && j< MAX_CLIENTS && !already_added){
 				if(ACTIVE_CLIENTS[j].active==0){
 					ACTIVE_CLIENTS[j].time_recvd = cur_time;
 					ACTIVE_CLIENTS[j].client = (struct sockaddr*) malloc(sizeof(addrlen));
 					memcpy(ACTIVE_CLIENTS[j].client, &activeCl, addrlen);
 					ACTIVE_CLIENTS[j].active=1; 
-					printf("client activated\n");		
+					printf("New client added\n");		
 					allocated=1;
 			}
 			j++;
 		}
 
-
-
-		count = 0;
 		//write to all active clients
-		for (int i = 0; i < MAX_CLIENTS; i++){
-			if( ACTIVE_CLIENTS[i].active==1 ){
-				if(sendto(list_s, buffer, MAX_STR_LEN, 0, (struct sockaddr*) ACTIVE_CLIENTS[i].client, addrlen) < 0 ) 		
-				perror("Writing to client failed");
-				count++;
-				printf("%s is client IP\n", inet_ntoa( ((struct sockaddr_in*)ACTIVE_CLIENTS[i].client)->sin_addr));
+		if(strcmp(buffer,"\n")!=0)
+			for (int i = 0; i < MAX_CLIENTS; i++){
+				if( ACTIVE_CLIENTS[i].active==1 ){
+					if(sendto(list_s, buffer, MAX_STR_LEN, 0, (struct sockaddr*) ACTIVE_CLIENTS[i].client, addrlen) < 0 ) 		
+						perror("Writing to client failed");
+					else
+						printf("Writing Successful!\n");
+				}
 			}
-		}
 
-		printf("Currently %d clients\n",count);
 
 
 	}
