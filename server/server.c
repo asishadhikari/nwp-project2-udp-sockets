@@ -17,6 +17,7 @@ int main(int argc, char** argv){
 	char buffer[MAX_STR_LEN];						//buffer
 	time_t cur_time, prev_time;	
 	tracker ACTIVE_CLIENTS[MAX_CLIENTS];
+	int already_added = 0;
 
 	//initialise clients
 	for (int i = 0; i < MAX_CLIENTS; i++){
@@ -66,13 +67,47 @@ int main(int argc, char** argv){
 		printf("%s\n",buffer);
 		
 		cur_time = time(0);		
-		update_active_clients(ACTIVE_CLIENTS, cur_time, &activeCl, addrlen);
+
+		//update inactive clients
+		for (int i = 0; i < MAX_CLIENTS; i++){
+			if( ACTIVE_CLIENTS[i].active && (((int) cur_time - ACTIVE_CLIENTS[i].time_recvd) <= 15)  ){
+				free(ACTIVE_CLIENTS[i].client);
+				ACTIVE_CLIENTS[i].active = 0;
+			}
+		}
+
+
+		// //check if already in the list
+		// for (int i = 0; i < MAX_CLIENTS; i++){
+		// 	if(ACTIVE_CLIENTS[i].active && bcmp()){
+
+		// 	}	
+		// }
+
+		//add the new client
+		for (int i = 0; i < MAX_CLIENTS; i++){
+			if(!ACTIVE_CLIENTS[i].active){
+				ACTIVE_CLIENTS[i].time_recvd = cur_time;
+				ACTIVE_CLIENTS[i].client = (struct sockaddr*) malloc(sizeof(addrlen));
+				memcpy(ACTIVE_CLIENTS[i].client, &activeCl, addrlen);
+				ACTIVE_CLIENTS[i].active=1; 
+				printf("client activated\n");
+			}
+		}
+
+
+
+		int count =0;
 		//write to all clients
 		for (int i = 0; i < MAX_CLIENTS; i++){
-			if( ACTIVE_CLIENTS[i].active && 
-				(sendto(list_s, buffer, MAX_STR_LEN, 0, (struct sockaddr*) &ACTIVE_CLIENTS[i], addrlen) ) < 0) 
+			if( ACTIVE_CLIENTS[i].active ){
+				if(sendto(list_s, buffer, MAX_STR_LEN, 0, (struct sockaddr*) &ACTIVE_CLIENTS[i], addrlen) < 0 ) 		
 				perror("Writing to client failed");
+				count++;
+			}
 		}
+
+		printf("Currently %d clients active\n",count);
 
 		//printf("Current time is %d\n",(int) (cur_time = time(0) ) );
 
