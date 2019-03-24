@@ -86,11 +86,9 @@ int main(int 	argc, char** argv){
 
 
 		// //check if already in the list
-		// for (int i = 0; i < MAX_CLIENTS; i++){
-		// 	if(ACTIVE_CLIENTS[i].active && bcmp()){
-
-		// 	}	
-		// }
+		for (int i = 0; i < MAX_CLIENTS; i++){
+			
+		}
 
 		//add the new client
 		int j = 0;
@@ -115,18 +113,14 @@ int main(int 	argc, char** argv){
 				if(sendto(list_s, buffer, MAX_STR_LEN, 0, (struct sockaddr*) ACTIVE_CLIENTS[i].client, addrlen) < 0 ) 		
 				perror("Writing to client failed");
 				count++;
+				printf("%s is client IP\n", inet_ntoa( ((struct sockaddr_in*)ACTIVE_CLIENTS[i].client)->sin_addr));
 			}
 		}
 
 		printf("Currently %d clients\n",count);
 
 
-/*		if ( (sendto(list_s, buffer, MAX_STR_LEN, 0,
-			(struct sockaddr*) &activeCl, addrlen)) < 0) 
-			error("Error sending message");
-		printf("message sent\n");
-
-*/	}
+	}
 
 	return 0;
 }
