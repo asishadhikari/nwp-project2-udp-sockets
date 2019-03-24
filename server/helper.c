@@ -21,7 +21,7 @@ void flush_buffer(char* buf){
 	}
 }
 
-void update_active_clients(tracker* list, time_t cur_time, struct sockaddr_in* activeClp){
+void update_active_clients(tracker* list, time_t cur_time, struct sockaddr_in* activeClp, socklen_t addrlen){
 	
 	//free inactive clients
 	for (int i = 0; i < MAX_CLIENTS; i++){
@@ -37,8 +37,10 @@ void update_active_clients(tracker* list, time_t cur_time, struct sockaddr_in* a
 		if (list[i].active==0){
 			printf("Found empty spot\n");
 			list[i].time_recvd = cur_time;
-			list[i].client = (struct sockaddr_in*) malloc(sizeof(sockaddr_in));
-			memcpy(&list[i].client, activeCl, sizeof(sockaddr_in));
+			list[i].client = (struct sockaddr_in*) malloc((int) addrlen);
+			memcpy(&list[i].client, activeClp, sizeof(addrlen));
+			list[i].active = 1;
+			break;
 		}
 
 	}
