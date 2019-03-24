@@ -77,11 +77,6 @@ int main(int 	argc, char** argv){
 				( ((uint32_t) cur_time - (uint32_t)ACTIVE_CLIENTS[i].time_recvd) >= (uint32_t)SESSION_TIME) ){
 				free(ACTIVE_CLIENTS[i].client);
 				ACTIVE_CLIENTS[i].active = 0;
-				printf("Client eliminated\n");
-
-				printf("%d cur time \n", (int) cur_time);
-				printf("%d initiated time \n",(int) ACTIVE_CLIENTS[i].time_recvd );
-				printf("%d SESSION_TIME is \n",SESSION_TIME );
 			}
 		}
 

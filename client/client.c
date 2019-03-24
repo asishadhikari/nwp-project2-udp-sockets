@@ -15,7 +15,7 @@ void update_display();
 void ask_user_input();
 pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 char user_input = 't';
-int soc;
+int soc, soc1;
 struct sockaddr_in servaddr;
 char buffer[MAX_STR_LEN];
 
@@ -41,6 +41,10 @@ int main(int argc, char** argv){
 
 	if(  (soc = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 		error("Unable to create socket\n");
+
+	if(  (soc1 = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+		error("Unable to create socket\n");
+
 
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
@@ -76,37 +80,45 @@ void* threadFunc(void *arg){
 
 
 void update_display(){
+	char *b = (char* )malloc(MAX_STR_LEN);
+	int msg_length, s = sizeof(servaddr);
 	time_t prev_time, cur_time;
 	prev_time = cur_time = time(0);
 	while (user_input!='q'){
+		//flush buffer
+		for(int i = 0; i < MAX_STR_LEN; i++)
+			buffer[i]= '\0';
 		cur_time = time(0);
 		if(cur_time - prev_time >=5 ){
-			pthread_mutex_lock( &mutex1 );
-				//Critical Section
-				if (sendto(soc, "\n", 1, 0, (struct sockaddr*) &servaddr, sizeof(servaddr)) < 0 ) 		
-					perror("Writing to server failed");
-				printf("Time to beacon home\n");
-				prev_time = cur_time;	
-    		pthread_mutex_unlock( &mutex1 );
+			prev_time = cur_time;	
+			if (sendto(soc, "\n", 1, 0, (struct sockaddr*) &servaddr, sizeof(servaddr)) < 0 ) 		
+				perror("Writing to server failed");
 		}
 
+		if( (msg_length = recvfrom(soc, b, MAX_STR_LEN, 
+			MSG_DONTWAIT, (struct sockaddr*) &servaddr, &s) ) > 1)
+			printf("buffer is %s ahaaa\n",buffer);
+
 	}
+
+	free(b);
 
 }
 
 void ask_user_input(){
+	int len;
 	while(user_input!='q'){
 		//flush buffer
 		for(int i = 0; i< MAX_STR_LEN; i++)
 			buffer[i] = '\0';
-		printf("\n\tEnter 's' to send string, 'q' to quit... ");
+		printf("\n\tEnter 's' to send string, 'q' to quit... \n");
 		user_input = (char) getc(stdin);
 		getc(stdin); //ignore newline char
 		if(user_input=='s'){
-			pthread_mutex_lock( &mutex1 );
-				//critical section
-				printf("String chosen\n");
-			pthread_mutex_unlock( &mutex1 );
+			fgets(buffer, MAX_STR_LEN ,stdin);
+			len = strlen(buffer);
+			if (sendto(soc1, buffer, len, 0, (struct sockaddr*) &servaddr, sizeof(servaddr)) < 0 ) 		
+				perror("Writing to server failed");
 		}
 	}
 
