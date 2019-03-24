@@ -4,12 +4,17 @@
 #include "helper.h"
 #include <arpa/inet.h>
 #include <string.h>
+#include <stdlib.h>
+#include <errno.h>
 
 int main(int argc, char** argv){
 	int list_s;
 	short int port;
 	struct sockaddr_in servaddr;
 	char* endptr = NULL;
+	char buffer[MAX_STR_LEN];
+	struct sockaddr_in activeCl;
+	socklen_t addrlen = sizeof(activeCl); //contains actual size on return
 
 	//input sanitisation
 	if (argc!=2){
@@ -27,6 +32,7 @@ int main(int argc, char** argv){
 	if( (list_s = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ){
 		error("Unable to create listening socket");
 	}
+
 	memset( &servaddr, 0, sizeof(servaddr) );
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(port);
@@ -36,7 +42,17 @@ int main(int argc, char** argv){
 		error("Unable to bind name to given socket");
 	}
 
-	
+	int msg_length;
+	while(1){
+		if( (msg_length = recvfrom(list_s, buffer, MAX_STR_LEN, 0, (struct sockaddr*) &activeCl, &addrlen) ) < 0 )
+			printf("Reading from socket failed!!\n");
+		printf("%s\n",buffer);
+		flush_buffer(buffer);
+	}
+
+
+
+
 
 	
 	return 0;
