@@ -15,7 +15,7 @@ int main(int argc, char** argv){
 	char* endptr = NULL;
 	char buffer[MAX_STR_LEN];
 	struct sockaddr_in activeCl;
-	socklen_t addrlen = sizeof(activeCl); //contains actual size on return
+	socklen_t addrlen = sizeof(sockaddr_in); //contains actual size on return
 	time_t cur_time, prev_time;	 
 	int msg_length;
 	tracker ACTIVE_CLIENTS[MAX_CLIENTS];
@@ -54,7 +54,7 @@ int main(int argc, char** argv){
 			0, (struct sockaddr*) &activeCl, &addrlen) ) < 0 )
 			printf("Reading from socket failed!!\n");
 		printf("%s\n",buffer);
-		update_active_clients(ACTIVE_CLIENTS, cur_time, activeCl);
+		update_active_clients(ACTIVE_CLIENTS, cur_time, &activeCl);
 
 		//printf("Current time is %d\n",(int) (cur_time = time(0) ) );
 
