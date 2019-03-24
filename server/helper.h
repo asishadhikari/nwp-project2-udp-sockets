@@ -1,21 +1,22 @@
 #ifndef HELPER
 #define HELPER
-#define MAX_CLIENTS 2
-#define MAX_STR_LEN 1
+#define MAX_CLIENTS 5
+#define MAX_STR_LEN 100
 
 typedef struct tracker
 {
 	time_t time_recvd;
-	struct sockaddr_in* client;
+	struct sockaddr* client;
 	int active;
 	
 }tracker;
 
 
+typedef struct sockaddr_in sockaddr_in_t;
+
 
 void error(char* msg);
-void flush_buffer(char* buf);
-void update_active_clients(tracker* list, time_t cur_time, struct sockaddr_in* activeCl, socklen_t addrlen);
+void update_active_clients(tracker* list, time_t cur_time, sockaddr_in_t* activeCl, socklen_t addrlen);
 
 
 
