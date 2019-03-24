@@ -9,7 +9,7 @@ int main(int argc, char** argv){
 	int list_s;
 	short int port;
 	struct sockaddr_in servaddr;
-	char* endptr;
+	char* endptr = NULL;
 
 	//input sanitisation
 	if (argc!=2){
@@ -18,7 +18,7 @@ int main(int argc, char** argv){
 	}
 	else{
 		port = strtol(argv[1], &endptr, 0);
-		if (*endptr){
+		if (endptr!=NULL && *endptr){
 			errno = EINVAL;
 			error("Invalid port number supplied!");
 		}
@@ -35,6 +35,8 @@ int main(int argc, char** argv){
 	if( ( bind(list_s, (struct sockaddr*) &servaddr, sizeof(servaddr)) ) < 0 ){
 		error("Unable to bind name to given socket");
 	}
+
+	
 
 	
 	return 0;
