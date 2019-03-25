@@ -17,10 +17,11 @@ void update_buffer();
 
 pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 char user_input = 't';
-int soc, soc1, dirty = 0;
+int soc, dirty = 0;
 struct sockaddr_in servaddr;
 
 char buffer[MAX_STR_LEN];
+char wbuffer[MAX_STR_LEN];
 
 
 
@@ -46,14 +47,8 @@ int main(int argc, char** argv){
 	if(  (soc = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 		error("Unable to create socket\n");
 
-	if(  (soc1 = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-		error("Unable to create socket\n");
 
 	if( ( bind(soc, (struct sockaddr*) &servaddr, sizeof(servaddr)) ) < 0 ){
-		error("Unable to bind name to given socket");
-	}
-
-	if( ( bind(soc1, (struct sockaddr*) &servaddr, sizeof(servaddr)) ) < 0 ){
 		error("Unable to bind name to given socket");
 	}
 
@@ -90,6 +85,8 @@ void* threadFunc(void *arg){
 		ask_user_input();
 	else if (t==3)
 		update_buffer();
+	else
+		printf("Something very wrong\n");
 }
 
 
@@ -110,17 +107,22 @@ void keep_alive(){
 			pthread_mutex_unlock(&mutex1);
 		}
 	}
-
-	
+	exit(EXIT_SUCCESS);
+	printf("exit keep_alive\n");
 }
 
 void update_buffer(){
+	printf("Called update buffer\n");
 	int s = sizeof(servaddr);
 	while(user_input!='q'){
-		if(recvfrom(soc1, buffer, MAX_STR_LEN, 
+		printf("hahahah\n");
+		if(recvfrom(soc, buffer, MAX_STR_LEN, 
 			0, (struct sockaddr*) &servaddr, &s)  > 1)
 			printf("\n Received data from server:  %s\n",buffer);
+		printf("one read successful\n");
 	}
+	printf("exit update_buffer\n");
+	exit(EXIT_SUCCESS);  //most likely this will not run as it is a blocking call
 }
 
 
@@ -129,17 +131,19 @@ void ask_user_input(){
 	while(user_input!='q'){
 		//flush buffer
 		for(int i = 0; i< MAX_STR_LEN; i++)
-			buffer[i] = '\0';
+			wbuffer[i] = '\0';
 		printf("\n\tEnter 's' to send string, 'q' to quit... \n");
 		user_input = (char) getc(stdin);
 		getc(stdin); //ignore newline char
 		if(user_input=='s'){
-			fgets(buffer, MAX_STR_LEN ,stdin);
-			len = strlen(buffer);
-			if (sendto(soc, buffer, len, 0, (struct sockaddr*) &servaddr, sizeof(servaddr)) < 0 ) 		
+			fgets(wbuffer, MAX_STR_LEN ,stdin);
+			len = strlen(wbuffer);
+			pthread_mutex_lock(&mutex1);
+			if (sendto(soc, wbuffer, len, 0, (struct sockaddr*) &servaddr, sizeof(servaddr)) < 0 ) 		
 				perror("Writing to server failed");
-		}
+			pthread_mutex_unlock(&mutex1);
+		}		
 	}
-
-
+	printf("exit ask_user_input\n");
+	exit(EXIT_SUCCESS);
 }
