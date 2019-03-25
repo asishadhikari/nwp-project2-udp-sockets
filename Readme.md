@@ -1,4 +1,4 @@
-# Assignment 2 - Simple UDP Client Server Application
+# Simple UDP Client Server Application
 
   ![logo_c ]
   # Features :
