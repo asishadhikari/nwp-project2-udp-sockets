@@ -85,6 +85,8 @@ void* threadFunc(void *arg){
 		ask_user_input();
 	else if (t==3)
 		update_buffer();
+
+	return;
 }
 
 
