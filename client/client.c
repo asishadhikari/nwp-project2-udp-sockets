@@ -85,8 +85,6 @@ void* threadFunc(void *arg){
 		ask_user_input();
 	else if (t==3)
 		update_buffer();
-	else
-		printf("Something very wrong\n");
 }
 
 
@@ -113,6 +111,9 @@ void keep_alive(){
 void update_buffer(){
 	int s = sizeof(servaddr);
 	while(user_input!='q'){
+		//flush buffer
+		for(int i = 0; i< MAX_STR_LEN; i++)
+			buffer[i] = '\0';
 		if(recvfrom(soc, buffer, MAX_STR_LEN, 
 			0, (struct sockaddr*) &servaddr, &s)  > 1)
 			printf("\n Received data from server:  %s\n",buffer);

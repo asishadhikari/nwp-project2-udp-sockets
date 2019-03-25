@@ -20,6 +20,8 @@ int main(int 	argc, char** argv){
 	tracker ACTIVE_CLIENTS[MAX_CLIENTS];
 	int already_added = 0, allocated, count;
 
+	int num_clients = 0;
+
 	//initialise clients
 	for (int i = 0; i < MAX_CLIENTS; i++){
 		ACTIVE_CLIENTS[i].time_recvd = 0;
@@ -67,7 +69,7 @@ int main(int 	argc, char** argv){
 			0, (struct sockaddr*) &activeCl, &addrlen) ) < 0 )
 			printf("Reading from socket failed!!\n");
 		allocated = 0;
-		printf("%s\n",buffer);
+		printf("Received from client: %s\n",buffer);
 	
 		cur_time = time(0);	
 
@@ -77,6 +79,7 @@ int main(int 	argc, char** argv){
 				( ((uint32_t) cur_time - (uint32_t)ACTIVE_CLIENTS[i].time_recvd) >= (uint32_t)SESSION_TIME) ){
 				free(ACTIVE_CLIENTS[i].client);
 				ACTIVE_CLIENTS[i].active = 0;
+				num_clients-=1;
 			}
 		}
 
@@ -93,7 +96,7 @@ int main(int 	argc, char** argv){
 			}
 		}
 
-		//add the new client
+		//add the new clients
 		int j = 0;
 		while(!allocated && j< MAX_CLIENTS && !already_added){
 				if(ACTIVE_CLIENTS[j].active==0){
@@ -101,9 +104,10 @@ int main(int 	argc, char** argv){
 					ACTIVE_CLIENTS[j].client = (struct sockaddr*) malloc(sizeof(addrlen));
 					memcpy(ACTIVE_CLIENTS[j].client, &activeCl, addrlen);
 					ACTIVE_CLIENTS[j].active=1; 
-					printf("New client added\n");		
+					printf("New Active Client added\n");		
 					allocated=1;
-			}
+					num_clients++;
+				}
 			j++;
 		}
 
@@ -118,14 +122,10 @@ int main(int 	argc, char** argv){
 					 (struct sockaddr*) ACTIVE_CLIENTS[i].client, addrlen)) < 0 ){
 						perror("Writing to client failed");							
 					} 		
-					printf("wrote %s and %d bytes\n", buffer,count);
 					//printf("Writing to port %d \n",(int)ntohs( ((struct sockaddr_in*)ACTIVE_CLIENTS[i].client)->sin_port));
 					//printf("Writing to IP %s \n", inet_ntoa(  ((struct sockaddr_in*)ACTIVE_CLIENTS[i].client)->sin_addr) );
 				}
 			}
-
-
-
 	}
 
 	return 0;
