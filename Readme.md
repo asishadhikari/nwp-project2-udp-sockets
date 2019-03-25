@@ -34,7 +34,7 @@
   >>```
 
   Where ```xxx.xxx.xxx``` is the server IP address and ```yy``` is the port number. 
-To use the client software, just follow the prompts on screen :)
+To use the client software, just press 's' and enter. Then type in the desired string and press enter again.
 
   # Assumptions:
   * Maximum number of client connections allowed is defined 

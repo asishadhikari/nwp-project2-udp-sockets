@@ -93,7 +93,6 @@ int main(int 	argc, char** argv){
 			}
 		}
 
-		printf("Already added is %d\n", already_added);
 		//add the new clients
 		j = 0;
 		allocated = 0;
@@ -122,12 +121,10 @@ int main(int 	argc, char** argv){
 					 (struct sockaddr*) ACTIVE_CLIENTS[i].client, addrlen)) <= 0 ){
 						perror("Writing to client failed");							
 					}else{
-					printf("Writing to port %d \n",(int)ntohs( ((struct sockaddr_in*)ACTIVE_CLIENTS[i].client)->sin_port));
+					//printf("Writing to port %d \n",(int)ntohs( ((struct sockaddr_in*)ACTIVE_CLIENTS[i].client)->sin_port));
 					}//printf("Writing to IP %s \n", inet_ntoa(  ((struct sockaddr_in*)ACTIVE_CLIENTS[i].client)->sin_addr) );
 				}
 			}
-		printf("%d clients are currently active\n",num_clients );
-
 	}
 
 	return 0;
