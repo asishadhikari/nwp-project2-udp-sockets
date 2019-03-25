@@ -2,7 +2,7 @@
 #define HELPER
 #define MAX_CLIENTS 6
 #define SESSION_TIME 15  //15 seconds till considered inactive
-#define MAX_STR_LEN 100
+#define MAX_STR_LEN 1000
 
 typedef struct tracker
 {

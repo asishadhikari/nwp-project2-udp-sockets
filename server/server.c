@@ -60,7 +60,7 @@ int main(int 	argc, char** argv){
 	while(1){
 		//flush buffer
 		for (int i = 0; i < MAX_STR_LEN; i++)
-			buffer[i] = 0;
+			buffer[i] = '\0';
 
 		//receive message on socket
 		if( (msg_length = recvfrom(list_s, buffer, MAX_STR_LEN, 
@@ -108,13 +108,19 @@ int main(int 	argc, char** argv){
 		}
 
 		//write to all active clients
+		int count = 0;
+		int len = strlen(buffer);
+
 		if(strcmp(buffer,"\n")!=0)
 			for (int i = 0; i < MAX_CLIENTS; i++){
 				if( ACTIVE_CLIENTS[i].active==1 ){
-					if(sendto(list_s, buffer, MAX_STR_LEN, 0, (struct sockaddr*) ACTIVE_CLIENTS[i].client, addrlen) < 0 ) 		
-						perror("Writing to client failed");
-					else
-						printf("Writing Successful!\n");
+					if( (count = sendto(list_s, buffer, len, 0,
+					 (struct sockaddr*) ACTIVE_CLIENTS[i].client, addrlen)) < 0 ){
+						perror("Writing to client failed");							
+					} 		
+					printf("wrote %s and %d bytes\n", buffer,count);
+					//printf("Writing to port %d \n",(int)ntohs( ((struct sockaddr_in*)ACTIVE_CLIENTS[i].client)->sin_port));
+					//printf("Writing to IP %s \n", inet_ntoa(  ((struct sockaddr_in*)ACTIVE_CLIENTS[i].client)->sin_addr) );
 				}
 			}
 

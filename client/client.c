@@ -11,13 +11,17 @@
 #include "helper.h"
 
 void* threadFunc(void *arg); //thread function 
-void update_display();
+void keep_alive();
 void ask_user_input();
+void update_buffer();
+
 pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 char user_input = 't';
-int soc, soc1;
+int soc, soc1, dirty = 0;
 struct sockaddr_in servaddr;
+
 char buffer[MAX_STR_LEN];
+
 
 
 
@@ -45,6 +49,14 @@ int main(int argc, char** argv){
 	if(  (soc1 = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 		error("Unable to create socket\n");
 
+	if( ( bind(soc, (struct sockaddr*) &servaddr, sizeof(servaddr)) ) < 0 ){
+		error("Unable to bind name to given socket");
+	}
+
+	if( ( bind(soc1, (struct sockaddr*) &servaddr, sizeof(servaddr)) ) < 0 ){
+		error("Unable to bind name to given socket");
+	}
+
 
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
@@ -56,12 +68,15 @@ int main(int argc, char** argv){
 	}
 
 
-	pthread_t t1, t2;
-	int a = 1, b = 2;
+	pthread_t t1, t2,t3;
+	int a = 1, b = 2, c= 3;
 	pthread_create(&t1, NULL, threadFunc, &a);
 	pthread_create(&t2, NULL, threadFunc, &b);
+	pthread_create(&t3, NULL, threadFunc, &c);
+	
 	pthread_join(t1, NULL);
 	pthread_join(t2, NULL);
+	pthread_join(t3,NULL);
 
 	return 0;
 }
@@ -70,40 +85,44 @@ int main(int argc, char** argv){
 void* threadFunc(void *arg){
 	int t = *(int*)arg;
 	if(t == 1)
-		update_display();
+		keep_alive();
 	else if (t==2)
 		ask_user_input();
-	else
-		error("Something wrong\n");
+	else if (t==3)
+		update_buffer();
 }
 
 
 
-void update_display(){
-	char *b = (char* )malloc(MAX_STR_LEN);
+void keep_alive(){
 	int msg_length, s = sizeof(servaddr);
 	time_t prev_time, cur_time;
 	prev_time = cur_time = time(0);
 	while (user_input!='q'){
 		//flush buffer
-		for(int i = 0; i < MAX_STR_LEN; i++)
-			buffer[i]= '\0';
 		cur_time = time(0);
+		//send '\n' every 5 s
 		if(cur_time - prev_time >=5 ){
-			prev_time = cur_time;	
+			prev_time = cur_time;
+			pthread_mutex_lock(&mutex1);	
 			if (sendto(soc, "\n", 1, 0, (struct sockaddr*) &servaddr, sizeof(servaddr)) < 0 ) 		
 				perror("Writing to server failed");
+			pthread_mutex_unlock(&mutex1);
 		}
-
-		if( (msg_length = recvfrom(soc, b, MAX_STR_LEN, 
-			MSG_DONTWAIT, (struct sockaddr*) &servaddr, &s) ) > 1)
-			printf("buffer is %s ahaaa\n",buffer);
-
 	}
 
-	free(b);
-
+	
 }
+
+void update_buffer(){
+	int s = sizeof(servaddr);
+	while(user_input!='q'){
+		if(recvfrom(soc1, buffer, MAX_STR_LEN, 
+			0, (struct sockaddr*) &servaddr, &s)  > 1)
+			printf("\n Received data from server:  %s\n",buffer);
+	}
+}
+
 
 void ask_user_input(){
 	int len;
@@ -117,7 +136,7 @@ void ask_user_input(){
 		if(user_input=='s'){
 			fgets(buffer, MAX_STR_LEN ,stdin);
 			len = strlen(buffer);
-			if (sendto(soc1, buffer, len, 0, (struct sockaddr*) &servaddr, sizeof(servaddr)) < 0 ) 		
+			if (sendto(soc, buffer, len, 0, (struct sockaddr*) &servaddr, sizeof(servaddr)) < 0 ) 		
 				perror("Writing to server failed");
 		}
 	}
