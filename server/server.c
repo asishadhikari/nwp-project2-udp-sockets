@@ -12,12 +12,12 @@
 
 int main(int 	argc, char** argv){
 
-	int list_s;   									//listening socket
+	int list_s, j;   									//listening socket
 	short int port;									//supplied port num
 	struct sockaddr_in servaddr;					//address for socket
 	char* endptr = NULL;					
 	char buffer[MAX_STR_LEN];						//buffer
-	time_t cur_time, prev_time;	
+	time_t cur_time;	
 	tracker ACTIVE_CLIENTS[MAX_CLIENTS];
 
 	//init client list
@@ -66,7 +66,6 @@ int main(int 	argc, char** argv){
 		if( (msg_length = recvfrom(list_s, buffer, MAX_STR_LEN, 
 			0, (struct sockaddr*) &activeCl, &addrlen) ) <= 0 )
 			printf("Reading from socket failed!!\n");
-		allocated = 0;
 		cur_time = time(0);	
 
 		//eliminate inactive clients
@@ -76,13 +75,11 @@ int main(int 	argc, char** argv){
 				printf("eliminating port %d\n",(int)ntohs( ((struct sockaddr_in*)ACTIVE_CLIENTS[i].client)->sin_port) );
 				free(ACTIVE_CLIENTS[i].client);
 				ACTIVE_CLIENTS[i].active = 0;
-				num_clients-=1;
-
 			}
 		}
 
 		already_added = 0;
-		// //check if already in the list
+		//check if already in the list
 		for (int i = 0; i < MAX_CLIENTS; i++){
 			if(ACTIVE_CLIENTS[i].active==1){	
 				struct in_addr rec = ((struct sockaddr_in*) ACTIVE_CLIENTS[i].client) -> sin_addr;
@@ -96,9 +93,11 @@ int main(int 	argc, char** argv){
 			}
 		}
 
+		printf("Already added is %d\n", already_added);
 		//add the new clients
-		int j = 0;
-		while(!allocated && j< MAX_CLIENTS && !already_added){
+		j = 0;
+		allocated = 0;
+		while(!allocated && j< MAX_CLIENTS && already_added!=1){
 				if(ACTIVE_CLIENTS[j].active==0){
 					ACTIVE_CLIENTS[j].time_recvd = cur_time;
 					ACTIVE_CLIENTS[j].client = (struct sockaddr*) malloc(sizeof(addrlen));
@@ -106,7 +105,6 @@ int main(int 	argc, char** argv){
 					ACTIVE_CLIENTS[j].active=1; 
 					printf("New Active Client added\n");		
 					allocated=1;
-					num_clients++;
 				}
 			j++;
 		}
