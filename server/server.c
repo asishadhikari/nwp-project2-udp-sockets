@@ -32,7 +32,6 @@ int main(int 	argc, char** argv){
 	struct sockaddr_in activeCl;	 			//temp holder that gets overridden
 	socklen_t addrlen = sizeof(struct sockaddr_in); //contains actual size on return
 	int msg_length;
-
 	//input sanitisation
 	if (argc!=2){
 		errno = EINVAL;
@@ -63,14 +62,11 @@ int main(int 	argc, char** argv){
 		//flush buffer
 		for (int i = 0; i < MAX_STR_LEN; i++)
 			buffer[i] = '\0';
-
 		//receive message on socket
 		if( (msg_length = recvfrom(list_s, buffer, MAX_STR_LEN, 
 			0, (struct sockaddr*) &activeCl, &addrlen) ) <= 0 )
 			printf("Reading from socket failed!!\n");
 		allocated = 0;
-		//printf("Received from client: %s\n",buffer);
-	
 		cur_time = time(0);	
 
 		//eliminate inactive clients
@@ -89,8 +85,9 @@ int main(int 	argc, char** argv){
 		// //check if already in the list
 		for (int i = 0; i < MAX_CLIENTS; i++){
 			if(ACTIVE_CLIENTS[i].active==1){	
-				struct in_addr rec =  ((struct sockaddr_in*) ACTIVE_CLIENTS[i].client) -> sin_addr;
-				if(bcmp(&rec, &(activeCl.sin_addr),4 )==0){
+				struct in_addr rec = ((struct sockaddr_in*) ACTIVE_CLIENTS[i].client) -> sin_addr;
+				short int prec = (short int) (( (struct sockaddr_in*) ACTIVE_CLIENTS[i].client ) -> sin_port);
+				if((bcmp(&rec, &(activeCl.sin_addr),4 )==0) && (prec == activeCl.sin_port) ){
 					printf("Client already in list!\n");
 					already_added =1;
 					break;
