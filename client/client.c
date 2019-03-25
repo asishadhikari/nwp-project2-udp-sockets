@@ -108,20 +108,15 @@ void keep_alive(){
 		}
 	}
 	exit(EXIT_SUCCESS);
-	printf("exit keep_alive\n");
 }
 
 void update_buffer(){
-	printf("Called update buffer\n");
 	int s = sizeof(servaddr);
 	while(user_input!='q'){
-		printf("hahahah\n");
 		if(recvfrom(soc, buffer, MAX_STR_LEN, 
 			0, (struct sockaddr*) &servaddr, &s)  > 1)
 			printf("\n Received data from server:  %s\n",buffer);
-		printf("one read successful\n");
 	}
-	printf("exit update_buffer\n");
 	exit(EXIT_SUCCESS);  //most likely this will not run as it is a blocking call
 }
 
@@ -144,6 +139,5 @@ void ask_user_input(){
 			pthread_mutex_unlock(&mutex1);
 		}		
 	}
-	printf("exit ask_user_input\n");
 	exit(EXIT_SUCCESS);
 }
