@@ -84,8 +84,8 @@ int main(int 	argc, char** argv){
 			if(ACTIVE_CLIENTS[i].active==1){	
 				struct in_addr rec = ((struct sockaddr_in*) ACTIVE_CLIENTS[i].client) -> sin_addr;
 				short int prec = (short int) (( (struct sockaddr_in*) ACTIVE_CLIENTS[i].client ) -> sin_port);
-				if((bcmp(&rec, &(activeCl.sin_addr),4 )==0) && (prec == activeCl.sin_port) ){
-					printf("Client already in list!\n");
+				if((bcmp(&rec, &(activeCl.sin_addr),4 )==0) && ((int)ntohs(prec) == (int) ntohs(activeCl.sin_port)) ){
+					printf("Client already active, not adding to list!\n");
 					already_added =1;
 					break;
 				}
